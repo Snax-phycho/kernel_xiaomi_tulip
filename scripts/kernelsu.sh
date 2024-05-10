@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2023 Unitrix Kernel
+# Copyright (C) 2023-2024 Unitrix Kernel
 #
 
 set -e
@@ -48,6 +48,9 @@ else
 do_older
 fi
 if [ $(git -C $KERNELSU describe --abbrev=0 --tags) = "v0.6.6" ]; then
-    git -C $KERNELSU cherry-pick --no-gpg-sign 0b1bab5b01d346ed4ad1b00d4ba974e27a20f5fb
+    git -C $KERNELSU cherry-pick -n --no-gpg-sign 0b1bab5b01d346ed4ad1b00d4ba974e27a20f5fb
+fi
+if [ $(git -C $KERNELSU describe --abbrev=0 --tags) = "v0.9.4" ]; then
+    git -C $KERNELSU cherry-pick -n --no-gpg-sign 7af4f338e56cce386ba0dccdc0871b687cd697b1
 fi
 
