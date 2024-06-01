@@ -53,4 +53,7 @@ fi
 if [ $(git -C $KERNELSU describe --abbrev=0 --tags) = "v0.9.4" ]; then
     git -C $KERNELSU cherry-pick -n --no-gpg-sign 7af4f338e56cce386ba0dccdc0871b687cd697b1
 fi
+if [ $(git -C $KERNELSU describe --abbrev=0 --tags) = "v1.0.0" ]; then
+    git -C $KERNELSU revert -n --no-gpg-sign 898e9d4f8ca9b2f46b0c6b36b80a872b5b88d899
+fi
 
