@@ -67,7 +67,7 @@ function start_sticker() {
 
 # clone toolchain
 function clone_tc() {
-    git clone --depth=1 --single-branch -b 18.0.1 https://gitlab.com/GhostMaster69-dev/android-clang $TC_PATH
+    git clone --depth=1 --single-branch -b 19.0.0 https://gitlab.com/GhostMaster69-dev/android-clang $TC_PATH
 }
 
 # clone anykernel3
