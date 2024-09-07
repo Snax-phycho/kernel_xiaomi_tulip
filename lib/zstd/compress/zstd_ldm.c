@@ -247,11 +247,7 @@ static size_t ZSTD_ldm_fillFastTables(ZSTD_matchState_t* ms,
         break;
 
     case ZSTD_dfast:
-#ifndef ZSTD_EXCLUDE_DFAST_BLOCK_COMPRESSOR
         ZSTD_fillDoubleHashTable(ms, iend, ZSTD_dtlm_fast, ZSTD_tfp_forCCtx);
-#else
-        assert(0); /* shouldn't be called: cparams should've been adjusted. */
-#endif
         break;
 
     case ZSTD_greedy:
@@ -323,9 +319,7 @@ static void ZSTD_ldm_limitTableUpdate(ZSTD_matchState_t* ms, const BYTE* anchor)
     }
 }
 
-static
-ZSTD_ALLOW_POINTER_OVERFLOW_ATTR
-size_t ZSTD_ldm_generateSequences_internal(
+static size_t ZSTD_ldm_generateSequences_internal(
         ldmState_t* ldmState, rawSeqStore_t* rawSeqStore,
         ldmParams_t const* params, void const* src, size_t srcSize)
 {

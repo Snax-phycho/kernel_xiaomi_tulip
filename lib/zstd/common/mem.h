@@ -24,7 +24,6 @@
 /*-****************************************
 *  Compiler specifics
 ******************************************/
-#undef MEM_STATIC /* may be already defined from common/compiler.h */
 #define MEM_STATIC static inline
 
 /*-**************************************************************
