@@ -53,19 +53,18 @@
 /*-*******************************************************
 *  Dependencies
 *********************************************************/
-#include "../common/zstd_deps.h"   /* ZSTD_memcpy, ZSTD_memmove, ZSTD_memset */
 #include "../common/allocations.h"  /* ZSTD_customMalloc, ZSTD_customCalloc, ZSTD_customFree */
-#include "../common/error_private.h"
-#include "../common/zstd_internal.h"  /* blockProperties_t */
+#include "../common/zstd_deps.h"   /* ZSTD_memcpy, ZSTD_memmove, ZSTD_memset */
 #include "../common/mem.h"         /* low level memory routines */
-#include "../common/bits.h"  /* ZSTD_highbit32 */
 #define FSE_STATIC_LINKING_ONLY
 #include "../common/fse.h"
 #include "../common/huf.h"
 #include <linux/xxhash.h> /* xxh64_reset, xxh64_update, xxh64_digest, XXH64 */
+#include "../common/zstd_internal.h"  /* blockProperties_t */
 #include "zstd_decompress_internal.h"   /* ZSTD_DCtx */
 #include "zstd_ddict.h"  /* ZSTD_DDictDictContent */
 #include "zstd_decompress_block.h"   /* ZSTD_decompressBlock_internal */
+#include "../common/bits.h"  /* ZSTD_highbit32 */
 
 
 
@@ -980,14 +979,12 @@ static size_t ZSTD_decompressFrame(ZSTD_DCtx* dctx,
         default:
             RETURN_ERROR(corruption_detected, "invalid block type");
         }
-        FORWARD_IF_ERROR(decodedSize, "Block decompression failure");
-        DEBUGLOG(5, "Decompressed block of dSize = %u", (unsigned)decodedSize);
-        if (dctx->validateChecksum) {
+
+        if (ZSTD_isError(decodedSize)) return decodedSize;
+        if (dctx->validateChecksum)
             xxh64_update(&dctx->xxhState, op, decodedSize);
-        }
-        if (decodedSize) /* support dst = NULL,0 */ {
+        if (decodedSize != 0)
             op += decodedSize;
-        }
         assert(ip != NULL);
         ip += cBlockSize;
         remainingSrcSize -= cBlockSize;
