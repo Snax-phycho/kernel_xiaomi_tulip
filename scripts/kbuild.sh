@@ -4,24 +4,26 @@
 # Copyright (C) 2021-2024 Unitrix Kernel
 #
 
-DEVICE="xiaomi tulip"
+DEVICE="lavender"
 TC_PATH="$HOME/clang-android"
 COMPILER_NAME="clang"
 LD_NAME="ld.lld"
 CROSS_COMPILE_ARM64="aarch64-linux-gnu-"
 CROSS_COMPILE_ARM32="arm-linux-gnueabi-"
 CMDS="LLVM=1 LLVM_IAS=1"
-DEFCONFIG="tulip_defconfig kernelsu.config"
+DEFCONFIG="lavender_defconfig"
 OUT_DIR="$(pwd)/out"
 KERNEL_IMG="$OUT_DIR/arch/arm64/boot/Image.gz-dtb"
-KBUILD_BUILD_USER="ghostmaster69-dev"
+KBUILD_BUILD_USER="Sa Sajjad"
 KBUILD_BUILD_HOST="codespace"
-TZ="Asia/Kolkata"
+TZ="Asia/Dhaka"
 ZIP_DIR="$HOME/AnyKernel3"
 
+CHANNEL_ID="$chat_id"
+TELEGRAM_TOKEN="$token"
 # Ask Telegram Channel/Chat ID
 if [ -z "$CHANNEL_ID" ]; then
-    echo -n "Plox,Give Me Your TG Channel/Group ID:"
+    #echo -n "Plox,Give Me Your TG Channel/Group ID:"
     read -r tg_channel_id
     CHANNEL_ID="$tg_channel_id"
 fi
@@ -73,7 +75,7 @@ function clone_tc() {
 # clone anykernel3
 function clone_anykernel3() {
     if ! [ -d $ZIP_DIR ]; then
-        git clone --depth=1 -b tulip https://github.com/GhostMaster69-dev/AnyKernel3 $ZIP_DIR
+        git clone --depth=1 -b tulip https://github.com/Snax-phycho/AnyKernel3 $ZIP_DIR
     fi
 }
 
