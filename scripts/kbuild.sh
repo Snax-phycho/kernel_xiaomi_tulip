@@ -18,22 +18,10 @@ KBUILD_BUILD_USER="Sa Sajjad"
 KBUILD_BUILD_HOST="codespace"
 TZ="Asia/Dhaka"
 ZIP_DIR="$HOME/AnyKernel3"
+DATE := $(shell date "+%d%m%Y-%I%M")
 
 CHANNEL_ID="$chat_id"
 TELEGRAM_TOKEN="$token"
-# Ask Telegram Channel/Chat ID
-if [ -z "$CHANNEL_ID" ]; then
-    #echo -n "Plox,Give Me Your TG Channel/Group ID:"
-    read -r tg_channel_id
-    CHANNEL_ID="$tg_channel_id"
-fi
-
-# Ask Telegram Bot API Token
-if [ -z "$TELEGRAM_TOKEN" ]; then
-    echo -n "Plox,Give Me Your TG Bot API Token:"
-    read -r tg_token
-    TELEGRAM_TOKEN="$tg_token"
-fi
 
 # Upload buildlog to group
 function tg_erlog() {
@@ -75,7 +63,7 @@ function clone_tc() {
 # clone anykernel3
 function clone_anykernel3() {
     if ! [ -d $ZIP_DIR ]; then
-        git clone --depth=1 -b tulip https://github.com/Snax-phycho/AnyKernel3 $ZIP_DIR
+        git clone https://github.com/Snax-phycho/AnyKernel3 $ZIP_DIR
     fi
 }
 
@@ -89,23 +77,11 @@ function build_kernel() {
     DIFF=$(($BUILD_END - $BUILD_START))
 }
 
-# Make flashable zip
 function make_flashable() {
-    make -C $ZIP_DIR clean &>/dev/null
     cp $KERNEL_IMG $ZIP_DIR
-    cp -rf $(find $OUT_DIR -name "*.ko") $ZIP_DIR/modules/system/lib/modules &>/dev/null
-    if [[ $(find $ZIP_DIR/modules/system/lib/modules -name *.ko) ]]; then
-        sed -i "s/do.modules=0/do.modules=1/g" $ZIP_DIR/anykernel.sh
-    else
-        sed -i "s/do.modules=1/do.modules=0/g" $ZIP_DIR/anykernel.sh
-    fi
-    if [ "$BRANCH" = "test" ]; then
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR test &>/dev/null
-    elif [ "$BRANCH" = "beta" ]; then
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR beta &>/dev/null
-    else
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR stable &>/dev/null
-    fi
+    cd $ZIP_DIR || exit 1
+    zip -r9 Unitrix-Eas-4.4-lavender-$(DATE) *
+    cd ..
 }
 
 # Credits: @madeofgreat
