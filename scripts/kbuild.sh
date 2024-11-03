@@ -5,7 +5,7 @@
 #
 
 DEVICE="lavender"
-TC_PATH="$HOME/clang-android"
+TC_PATH="$(pwd)/clang-android"
 COMPILER_NAME="clang"
 LD_NAME="ld.lld"
 CROSS_COMPILE_ARM64="aarch64-linux-gnu-"
@@ -17,15 +17,15 @@ KERNEL_IMG="$OUT_DIR/arch/arm64/boot/Image.gz-dtb"
 KBUILD_BUILD_USER="Sa Sajjad"
 KBUILD_BUILD_HOST="codespace"
 TZ="Asia/Dhaka"
-ZIP_DIR="$HOME/AnyKernel3"
-DATE := $(shell date "+%d%m%Y-%I%M")
+ZIP_DIR="$(pwd)/AnyKernel3"
+DATE=$(shell date "+%d%m%Y-%I%M")
 
 CHANNEL_ID="$chat_id"
 TELEGRAM_TOKEN="$token"
 
 # Upload buildlog to group
 function tg_erlog() {
-    ERLOG="$HOME/build/build$BUILD.txt"
+    ERLOG="$(pwd)/build/build$BUILD.txt"
     curl -F document=@"$ERLOG"  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
 	    -F chat_id="$CHANNEL_ID" \
 	    -F caption="Build ran into errors after $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds, plox check logs"
@@ -72,7 +72,7 @@ function build_kernel() {
     DATE=$date
     BUILD_START=$(date +"%s")
     make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR $DEFCONFIG
-    make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR -j$(nproc --all) |& tee -a $HOME/build/build$BUILD.txt
+    make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR -j$(nproc --all) |& tee -a $(pwd)/build/build$BUILD.txt
     BUILD_END=$(date +"%s")
     DIFF=$(($BUILD_END - $BUILD_START))
 }
@@ -85,10 +85,10 @@ function make_flashable() {
 }
 
 # Credits: @madeofgreat
-BTXT="$HOME/build/buildno.txt" #BTXT is Build number TeXT
+BTXT="$(pwd)/build/buildno.txt" #BTXT is Build number TeXT
 if ! [ -a "$BTXT" ]; then
-    mkdir $HOME/build
-    touch $HOME/build/buildno.txt
+    mkdir $(pwd)/build
+    touch $(pwd)/build/buildno.txt
     echo $RANDOM > $BTXT
 fi
 BUILD=$(cat $BTXT)
@@ -117,7 +117,7 @@ function error_sticker() {
 
 # Upload build logs file on telegram channel
 function tg_push_logs() {
-    LOG=$HOME/build/build$BUILD.txt
+    LOG=$(pwd)/build/build$BUILD.txt
     curl -F document=@"$LOG"  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
 	    -F chat_id=$CHANNEL_ID \
 	    -F caption="Build Finished after $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds"
@@ -146,8 +146,8 @@ tg_sendinfo "$(echo -e "\n
 <b>Commit Branch</b>: <code>$BRANCH</code>
 <b>Commit Hash</b>: <code>$COMMIT_HASH</code>
 <b>Commit Message</b>: <i>$COMMIT_MESSAGE</i>\n")"
-build_kernel
 clone_anykernel3
+build_kernel
 if ! [ -a "$KERNEL_IMG" ]; then
     tg_erlog
     error_sticker
