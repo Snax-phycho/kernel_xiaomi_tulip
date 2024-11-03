@@ -5,7 +5,7 @@
 #
 
 DEVICE="lavender"
-TC_PATH="$HOME/clang-android"
+TC_PATH="$(pwd)/clang-android"
 COMPILER_NAME="clang"
 LD_NAME="ld.lld"
 CROSS_COMPILE_ARM64="aarch64-linux-gnu-"
@@ -17,27 +17,14 @@ KERNEL_IMG="$OUT_DIR/arch/arm64/boot/Image.gz-dtb"
 KBUILD_BUILD_USER="Sa Sajjad"
 KBUILD_BUILD_HOST="codespace"
 TZ="Asia/Dhaka"
-ZIP_DIR="$HOME/AnyKernel3"
+ZIP_DIR="$(pwd)/AnyKernel3"
 
 CHANNEL_ID="$chat_id"
 TELEGRAM_TOKEN="$token"
-# Ask Telegram Channel/Chat ID
-if [ -z "$CHANNEL_ID" ]; then
-    #echo -n "Plox,Give Me Your TG Channel/Group ID:"
-    read -r tg_channel_id
-    CHANNEL_ID="$tg_channel_id"
-fi
-
-# Ask Telegram Bot API Token
-if [ -z "$TELEGRAM_TOKEN" ]; then
-    echo -n "Plox,Give Me Your TG Bot API Token:"
-    read -r tg_token
-    TELEGRAM_TOKEN="$tg_token"
-fi
 
 # Upload buildlog to group
 function tg_erlog() {
-    ERLOG="$HOME/build/build$BUILD.txt"
+    ERLOG="$(pwd)/build/build$BUILD.txt"
     curl -F document=@"$ERLOG"  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
 	    -F chat_id="$CHANNEL_ID" \
 	    -F caption="Build ran into errors after $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds, plox check logs"
@@ -75,7 +62,7 @@ function clone_tc() {
 # clone anykernel3
 function clone_anykernel3() {
     if ! [ -d $ZIP_DIR ]; then
-        git clone --depth=1 -b tulip https://github.com/Snax-phycho/AnyKernel3 $ZIP_DIR
+        git clone --depth=1 https://github.com/Snax-phycho/AnyKernel3 $ZIP_DIR
     fi
 }
 
@@ -84,35 +71,23 @@ function build_kernel() {
     DATE=$date
     BUILD_START=$(date +"%s")
     make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR $DEFCONFIG
-    make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR -j$(nproc --all) |& tee -a $HOME/build/build$BUILD.txt
+    make ARCH=arm64 CC=$COMPILER_NAME LD=$LD_NAME CROSS_COMPILE=$CROSS_COMPILE_ARM64 CROSS_COMPILE_ARM32=$CROSS_COMPILE_ARM32 $CMDS O=$OUT_DIR -j$(nproc --all) |& tee -a $(pwd)/build/build$BUILD.txt
     BUILD_END=$(date +"%s")
     DIFF=$(($BUILD_END - $BUILD_START))
 }
 
-# Make flashable zip
 function make_flashable() {
-    make -C $ZIP_DIR clean &>/dev/null
     cp $KERNEL_IMG $ZIP_DIR
-    cp -rf $(find $OUT_DIR -name "*.ko") $ZIP_DIR/modules/system/lib/modules &>/dev/null
-    if [[ $(find $ZIP_DIR/modules/system/lib/modules -name *.ko) ]]; then
-        sed -i "s/do.modules=0/do.modules=1/g" $ZIP_DIR/anykernel.sh
-    else
-        sed -i "s/do.modules=1/do.modules=0/g" $ZIP_DIR/anykernel.sh
-    fi
-    if [ "$BRANCH" = "test" ]; then
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR test &>/dev/null
-    elif [ "$BRANCH" = "beta" ]; then
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR beta &>/dev/null
-    else
-	make LINUX_VERSION="$KERNEL_VERSION" -C $ZIP_DIR stable &>/dev/null
-    fi
+    cd $ZIP_DIR || exit 1
+    zip -r9 Unitrix-Eas-qti-4.4-$DEVICE-$(date "+%d%m").zip *
+    cd ..
 }
 
 # Credits: @madeofgreat
-BTXT="$HOME/build/buildno.txt" #BTXT is Build number TeXT
+BTXT="$(pwd)/build/buildno.txt" #BTXT is Build number TeXT
 if ! [ -a "$BTXT" ]; then
-    mkdir $HOME/build
-    touch $HOME/build/buildno.txt
+    mkdir $(pwd)/build
+    touch $(pwd)/build/buildno.txt
     echo $RANDOM > $BTXT
 fi
 BUILD=$(cat $BTXT)
@@ -141,7 +116,7 @@ function error_sticker() {
 
 # Upload build logs file on telegram channel
 function tg_push_logs() {
-    LOG=$HOME/build/build$BUILD.txt
+    LOG=$(pwd)/build/build$BUILD.txt
     curl -F document=@"$LOG"  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
 	    -F chat_id=$CHANNEL_ID \
 	    -F caption="Build Finished after $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds"
@@ -170,8 +145,8 @@ tg_sendinfo "$(echo -e "\n
 <b>Commit Branch</b>: <code>$BRANCH</code>
 <b>Commit Hash</b>: <code>$COMMIT_HASH</code>
 <b>Commit Message</b>: <i>$COMMIT_MESSAGE</i>\n")"
-build_kernel
 clone_anykernel3
+build_kernel
 if ! [ -a "$KERNEL_IMG" ]; then
     tg_erlog
     error_sticker
