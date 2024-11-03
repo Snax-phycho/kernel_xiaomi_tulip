@@ -18,7 +18,6 @@ KBUILD_BUILD_USER="Sa Sajjad"
 KBUILD_BUILD_HOST="codespace"
 TZ="Asia/Dhaka"
 ZIP_DIR="$(pwd)/AnyKernel3"
-DATE=$(shell date "+%d%m%Y-%I%M")
 
 CHANNEL_ID="$chat_id"
 TELEGRAM_TOKEN="$token"
@@ -80,7 +79,7 @@ function build_kernel() {
 function make_flashable() {
     cp $KERNEL_IMG $ZIP_DIR
     cd $ZIP_DIR || exit 1
-    zip -r9 Unitrix-Eas-4.4-lavender-$(DATE) *
+    zip -r9 Unitrix-Eas-4.4-$DEVICE-$(date "+%d%m").zip *
     cd ..
 }
 
